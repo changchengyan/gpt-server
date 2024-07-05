@@ -8,5 +8,11 @@
           "command": "python main.py"
         }
       }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/"
+      }
     ]
   }
