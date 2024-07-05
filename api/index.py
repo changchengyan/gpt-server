@@ -1,14 +1,13 @@
-from flask import Flask, request, jsonify,send_from_directory
+from flask import Flask, request, jsonify
 from requests import HTTPError
 from werkzeug.utils import secure_filename
 import os
-from dotenv import load_dotenv
+
 
 from utils import utils
 
 from utils  import getFileData
 
-load_dotenv()
 
 app = Flask(__name__,static_folder='dist')
 @app.route('/')
