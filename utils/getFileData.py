@@ -4,24 +4,24 @@ from typing_extensions import override
 from openai import AssistantEventHandler, OpenAI
 
 # Initialize the OpenAI client with your API key
-client = OpenAI(api_key="sk-proj-xxxxxx")
 
-def initialize_assistant():
+
+def initialize_assistant(client,model):
     # Create the assistant
     assistant = client.beta.assistants.create(
         name="FileContent Analyst Assistant",
         instructions="You are an expert file analyst. Use your knowledge base to answer questions about audited file content.",
-        model="gpt-4o",
+        model=model,
         tools=[{"type": "file_search"}],
     )
     return assistant
 
-def create_vector_store():
+def create_vector_store(client):
     # Create a vector store
     vector_store = client.beta.vector_stores.create(name="Financial Statements")
     return vector_store
 
-def upload_files(vector_store_id, file_paths):
+def upload_files(client,vector_store_id, file_paths):
     # Ready the files for upload to OpenAI
     file_streams = [open(path, "rb") for path in file_paths]
 
@@ -31,8 +31,8 @@ def upload_files(vector_store_id, file_paths):
     )
 
     # Print the status and file counts
-    print(file_batch.status)
-    print(file_batch.file_counts)
+    # print(file_batch.status)
+    # print(file_batch.file_counts)
 
     # Close the file streams
     for file_stream in file_streams:
@@ -40,7 +40,7 @@ def upload_files(vector_store_id, file_paths):
 
     return file_batch
 
-def update_assistant_with_vector_store(assistant_id, vector_store_id):
+def update_assistant_with_vector_store(client,assistant_id, vector_store_id):
     # Update the assistant with the new vector store
     assistant = client.beta.assistants.update(
         assistant_id=assistant_id,
@@ -48,14 +48,14 @@ def update_assistant_with_vector_store(assistant_id, vector_store_id):
     )
     return assistant
 
-def upload_user_file(file_path):
+def upload_user_file(client,file_path):
     # Upload the user-provided file
     message_file = client.files.create(
         file=open(file_path, "rb"), purpose="assistants"
     )
     return message_file
 
-def create_thread_with_message(assistant_id, message_file_id,promot):
+def create_thread_with_message(client, message_file_id,promot):
     # Create a thread and attach the file to the message
     thread = client.beta.threads.create(
         messages=[
@@ -80,7 +80,7 @@ class EventHandler(AssistantEventHandler):
         # Capture the response data
         self.response_data = message.content[0].text
 
-def stream_response(thread_id, assistant_id):
+def stream_response(client,thread_id, assistant_id):
     # Stream the response and return the response data
     event_handler = EventHandler()
     with client.beta.threads.runs.stream(
@@ -108,16 +108,16 @@ def  formatData(str):
         print("未找到JSON数据")
         return  {}
 
-def getFileData(filePaths,promot):
-    print(filePaths)
-    assistant = initialize_assistant()
-    vector_store = create_vector_store()
+def getFileData(filePaths,promot,api_key,model):
+    client = OpenAI(api_key=api_key)
+    assistant = initialize_assistant(client,model)
+    vector_store = create_vector_store(client)
     file_paths = filePaths
-    upload_files(vector_store.id, file_paths)
-    update_assistant_with_vector_store(assistant.id, vector_store.id)
-    message_file = upload_user_file(filePaths[0])
-    thread = create_thread_with_message(assistant.id, message_file.id,promot)
-    response_data = stream_response(thread.id, assistant.id)
+    upload_files(client,vector_store.id, file_paths)
+    update_assistant_with_vector_store(client,assistant.id, vector_store.id)
+    message_file = upload_user_file(client,filePaths[0])
+    thread = create_thread_with_message(client, message_file.id,promot)
+    response_data = stream_response(client,thread.id, assistant.id)
     # print("Response Data:", response_data.value)
     return  response_data.value
 

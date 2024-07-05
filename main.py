@@ -10,8 +10,6 @@ from utils  import getFileData
 
 load_dotenv()
 
-print(os.environ.get('OPENAI_API_KEY'))
-
 app = Flask(__name__,static_folder='dist')
 @app.route('/')
 def index():
@@ -36,16 +34,20 @@ def upload_files():
 
     try:
 
+        if request.form["token"] is None or request.form["model"] == '':
+            return jsonify({'code':500,'message': 'not token'}), 200
+
         if 'file' not in request.files and not 'text' in request.form:
-            return jsonify({'message': 'not file or text'}), 500
+            return jsonify({'code':500,'message': 'not file or text'}), 200
         
         text =  request.form['text']
-        
+        api_key = request.form["token"]
+        model = request.form["model"]
 
         if 'file'  in request.files:
             promot =  request.form['text']
             if not promot:
-                return jsonify({'code':500,'message': 'not file or text'}), 500
+                return jsonify({'code':500,'message': 'not file or text'}), 200
             
             file = request.files['file']
             if file.filename == '':
@@ -57,16 +59,14 @@ def upload_files():
                 file_path = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(file_path)
 
-            res = getFileData.getFileData(filePaths=[file_path],promot=promot)
+            res = getFileData.getFileData(filePaths=[file_path],promot=promot,api_key=api_key,model=model)
 
-            print(res)
-
-            return jsonify({"code":200,'message': 'FileUpload Success', 'data': res}), 200
+            return jsonify({"code":200,'message': 'fetch Success', 'data': res}), 200
         
         else:
             text =  request.form['text']
             print(text)
-            res = utils.fetch_text_bychatgpt(text)
+            res = utils.fetch_text_bychatgpt(text,api_key=api_key,model=model)
             return jsonify({"code":200,'message': 'fetch Success', 'data': res}), 200
         
     except HTTPError as error:

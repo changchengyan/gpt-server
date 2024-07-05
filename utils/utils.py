@@ -1,12 +1,6 @@
-import os
 import requests
 
-
-
-   
-def fetch_text_bychatgpt(text):
-    model = os.environ.get('MODEL')
-    api_key = os.environ.get('OPENAI_API_KEY')
+def fetch_text_bychatgpt(text,api_key,model):
     headers = {
         'Authorization': f'Bearer {api_key}',
         'Content-Type': 'application/json'
@@ -28,9 +22,7 @@ def fetch_text_bychatgpt(text):
     if response.status_code == 200:
         # 解析响应数据
         completion = response.json()
-        print(completion['choices'][0]['message'])
         generated_text = completion['choices'][0]['message']['content'].strip()
-        print(generated_text)
         return generated_text
     else:
         return ""
