@@ -1,0 +1,13 @@
+Flask==2.0.0
+Flask-Babel==0.12.2
+Flask-Builder==0.9
+Flask-Cors==3.0.7
+Flask-Mail==0.9.1
+Flask-Migrate==2.4.0
+Flask-RESTful==0.3.7
+Flask-SocketIO==3.3.2
+Flask-SQLAlchemy==2.5.1
+openai==1.35.7
+python-dotenv==1.0.0
+requests==2.28.1
+
