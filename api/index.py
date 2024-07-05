@@ -22,9 +22,7 @@ UPLOAD_FOLDER = os.path.join(os.getcwd(), 'upload')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 
-
-
-@app.route('/api/genPdf', methods=['POST'])
+@app.route('/api/content', methods=['POST'])
 def upload_files():
 
     print(request.files)
@@ -72,6 +70,3 @@ def upload_files():
     except HTTPError as error:
             return jsonify({"code":500,'message': error, 'data': None}), 200    
 
-
-if __name__ == '__main__':
-    app.run(debug=True,port=80)
